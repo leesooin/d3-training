@@ -1,0 +1,51 @@
+<html>
+
+    <head>
+    		<title>Dev Env</title>
+    		<script src="https://d3js.org/d3.v4.min.js"></script>
+    		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.14.2/math.min.js"></script>
+    </head>
+
+    <body>
+        <script>
+        	  var canvas = d3.select("body")
+        									 .append("svg")
+        									 .attr("width", 800)
+        									 .attr("height", 800);     		
+        									   
+        		function updateViz(data){
+
+
+        			var selection = canvas.selectAll('circle').data(data)
+        			
+        			selection.enter()
+	        				  	.append("circle")
+	        				  	.attr("cx", function(d){ return (math.random() + 5) * d.size; })
+	        				  	.attr("cy", function(d){ return (math.random() + 5) * d.size/2; })
+	        				  	.attr("r",  function(d){ return d.size; })
+	        				  	.attr("fill", "none")
+	        				  	.attr("stroke", function(d){ return d.color; });
+	        				  	
+        			selection.exit()
+        							 .remove();
+        							 
+        			selection
+	        				  	.attr("cx", function(d){ return (math.random() + 5) * d.size; })
+	        				  	.attr("cy", function(d){ return (math.random() + 5) * d.size/2; })
+	        				  	.attr("r",  function(d){ return d.size; })
+	        				  	.attr("stroke", function(d){ return d.color; });    			
+        		}
+        		
+        		function animate(data){
+        			updateViz(data);
+        			var loop = setInterval(function(){
+        				if (data.length === 0) { clearInterval(loop); }
+        				data.pop();
+        				updateViz(data);
+        			}, 2000);
+        		}
+        		
+        		d3.json("data.json", animate);
+        </script>
+    </body>
+</html>
