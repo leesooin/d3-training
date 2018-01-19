@@ -1,0 +1,151 @@
+<html>
+
+    <head>
+        <title>Bar Chart</title>
+        <style>
+        		body {
+        				font-size: 12px; 
+								font-family: Arial, Helvetica, sans-serif; 
+        		}
+        </style>
+    </head>
+
+    <body>
+        <div id="chart-holder"></div>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script>
+        var width = 800;
+        var height = 1600;
+
+        var margin = {top: 50, right: 50, bottom: 50, left: 50};
+
+        // calculate dimensions without margins
+        var innerWidth = width - margin.left - margin.right;
+        var innerHeight = height - margin.top - margin.bottom;
+
+        // create svg element
+        var svg = d3.select('body')
+				            .append('svg')
+				            .attr('height', height)
+				            .attr('width', width);
+
+        // create inner group element
+        var g = svg.append('g')
+            			 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // read in our data
+        d3.json('climate.json', function(error, data) {
+            // handle read errors
+            if (error) {
+                console.error('failed to read data');
+                return;
+            }
+
+            console.log('raw', data);
+
+            // coerce data to numeric
+            data.forEach(function(d) {
+                d.temp = +d.temp;
+            });
+
+            console.log('clean', data);
+
+            // scales
+            var x = d3.scaleLinear()
+			                .domain([
+			                    -1,
+			                    d3.max(data, function(d) {
+			                        return d.temp+2.25;
+			                    })
+			                ])
+			                .range([0, innerHeight]);
+
+            console.log(x.domain(), x.range());
+            
+            var y = d3.scaleBand()
+			                .domain(
+			                    data.map(function(d) {
+			                        return d.year;
+			                    })
+			                )
+			                .range([0, innerHeight])
+			                .padding(0.2);
+
+            console.log(y.domain(), y.range());
+            
+						// colors
+            var z = d3.scaleOrdinal().range(["Pink", "Red", "Maroon"]);
+            
+            // axes
+            var xAxis = d3.axisBottom(x).ticks(10);
+
+            g
+                .append('g')
+                .attr('class', 'x-axis')
+                .attr('transform', 'translate('+ margin.left/2 + ',' + innerHeight + ')')
+                .call(xAxis);
+                
+            var yAxis = d3.axisLeft(y);
+
+            g
+                .append('g')
+                .attr('class', 'y-axis')
+                .attr('transform', 'translate(' + margin.left/2 + ',0)')
+                .call(yAxis);
+
+            // bars
+            g
+                .selectAll('.bar')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', margin.left/2)
+                .attr('y', function(d) {
+                    return y(d.year);
+                })
+                .attr('height', y.bandwidth())
+                .attr('width', function(d) {
+                    return x(d.temp);
+                })
+                .attr('fill', function(d,i) {
+                		return z(d.year.substring(0,3));
+                })
+                .attr('stroke', 'none');
+
+            // axis labels
+            g
+                .append('text')
+                .attr('class', 'y-axis-label')
+                .attr('y', innerHeight/2)
+                .attr('x', -30)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'hanging')
+                .text('Year');
+
+            g
+                .append('text')
+                .attr('class', 'x-axis-label')
+                .attr('y', innerHeight + 30)
+                .attr('x', innerWidth / 2)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'baseline')
+                .text('Temperatures');
+
+            // title
+            g
+                .append('text')
+                .attr('class', 'title')
+                .attr('y', -10)
+                .attr('x', innerWidth / 2)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'baseline')
+                .style('font-size', 24)
+                .text('Yearly Global Temperatures');
+        });
+
+
+        </script>
+    </body>
+
+</html>
