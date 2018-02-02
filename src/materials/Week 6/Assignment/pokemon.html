@@ -1,0 +1,118 @@
+<html>
+
+    <head>
+        <title>pokemon</title>
+
+    </head>
+
+    <body>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script>
+
+        d3.json('pokemon.json', function(error, data) {
+            // handle read errors
+            if (error) {
+                console.error('failed to read data');
+                return;
+            }
+            console.log('RawData', data);
+
+						// 1. calculate the average weight (lbs) and height (in inches) of the pokemon
+            var H = []; var W = [];
+            data.forEach(function(d){
+            	H.push(+d.height.replace(' m', ''));
+            	W.push(+d.weight.replace(' kg',''));
+            });
+
+            console.log('Height', H);
+            console.log('Weight', W);
+
+            console.log('AvgHeight_m',  d3.mean(H));
+					  console.log('AvgWeight_kg', d3.mean(H));
+            
+            console.log('AvgHeight_inch', d3.mean(H) * 39.37);
+					  console.log('AvgWeight_lbs',  d3.mean(H) * 2.205);
+					  
+					  // 2. What is the total egg distance (value on egg property) for all pokemon who have a weakness of 'Psychic'
+					  var eggDist_psychic = [];
+					  data
+					  .filter(function(d){
+            	return d.weaknesses.indexOf("Psychic") > 0;
+            })
+            .forEach(function(d){
+            	if (d.egg == 'Not in Eggs'){
+            		eggDist_psychic.push(-1);
+            	} else {
+	            	eggDist_psychic.push(+d.egg.replace(' km',''));
+	            }
+            })
+            console.log('eggDist', eggDist_psychic);
+            
+            var totEggDist = eggDist_psychic.reduce(function(s, d){
+            	return s + d;
+            }, 0);
+            console.log('totEggDist', totEggDist);
+
+					  // 3. which type of pokemon has the most weaknesses on average
+            var numWeaknesses = {};
+            data.forEach(function(d){
+            	d.type.forEach(function(t){
+            		if(Object.keys(numWeaknesses).indexOf(t) >= 0){
+            			numWeaknesses[t].push(d.weaknesses.length);
+            		} else {
+            			numWeaknesses[t] = [d.weaknesses.length];
+            		}
+            	})
+            })
+            console.log('numWeaknesses', numWeaknesses);
+            var AvgWeaknesses = [];
+            Object.keys(numWeaknesses).forEach(function(n){
+            	AvgWeaknesses.push([d3.mean(numWeaknesses[n]), n]);
+            })
+            console.log('AvgWeaknesses', AvgWeaknesses);
+            AvgWeaknesses.sort(function(a,b){
+            	return b[0] - a[0];
+            })
+            console.log('AvgWeaknesses_sorted', AvgWeaknesses);
+
+						// 4. break pokemon down into 5 equal buckets of weight classes and then 
+						// average spawn_time (show in minutes) of each weight class
+						H.sort()
+						console.log('Height_sorted',H)
+						var q1 = d3.quantile(H, 0.2); var q2 = d3.quantile(H, 0.4);
+						var q3 = d3.quantile(H, 0.6); var q4 = d3.quantile(H, 0.8);
+						console.log('q1', q1); console.log('q2', q2); console.log('q3', q3); console.log('q4', q4);	
+						var groups = {'group1':[],'group2':[],'group3':[],'group4':[],'group5':[]};
+						data.forEach(function(d) {
+							var spawntime_sec = d.spawn_time.split(":").map(function(s, i){
+								if (i == 0) { return +s * 60; } 
+								else        { return +s; }
+							})
+							var spawntime = spawntime_sec.reduce(function(s, d){
+								return s + d;
+							}, 0)
+							if (!isNaN(spawntime)){
+								if (+d.height.replace(' m', '') < q1) {
+									groups['group1'].push(spawntime);
+								} else if (+d.height.replace(' m', '') < q2) {
+									groups['group2'].push(spawntime);
+								} else if (+d.height.replace(' m', '') < q3) {
+									groups['group3'].push(spawntime);
+								} else if (+d.height.replace(' m', '') < q4) {
+									groups['group4'].push(spawntime);
+								} else {
+									groups['group5'].push(spawntime);
+								}
+							}
+						})
+						console.log('spawnTime_sec',groups);
+						var groups_avg = {'group1':[],'group2':[],'group3':[],'group4':[],'group5':[]};
+						Object.keys(groups).forEach(function(g){
+							groups_avg[g] = (d3.sum(groups[g])/groups[g].length)/60;
+						})
+						console.log('spawnTime_avg_min',groups_avg);
+
+						})     
+        </script>
+    </body>
+</html>
