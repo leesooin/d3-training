@@ -1,0 +1,90 @@
+<html>
+
+    <head>
+        <title>us-employment</title>
+    </head>
+
+    <body>
+        <div id="map-holder"></div>
+
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script>
+            function buildMap(containerId) {
+                var width = 900;
+                var height = 800;    
+
+                var margin = {
+                    top: 50,
+                    right: 50,
+                    bottom: 50,
+                    left: 50
+                };
+
+                // calculate dimensions without margins
+                var innerWidth = width - margin.left - margin.right;
+                var innerHeight = height - margin.top - margin.bottom;
+
+                // create svg element
+                var svg = d3
+                    .select(containerId)
+                    .append('svg')
+                    .attr('height', height)
+                    .attr('width', width);
+
+                // create inner group element
+                var g = svg
+                    .append('g')
+                    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+                // read in our data
+                d3.json('us-counties.json', function(error, geojson) {
+                    handleError(error, 'failed to read geoJSON data');
+                });
+
+                function handleError(error, msg) {
+                    if (error) {
+                        console.error(msg);
+                    }
+                }
+
+                // read in our data
+                var d12;
+                d3.csv('laucnty12.csv', function(error,data){
+                    handleError(error, 'failed to read geoJSON data');
+                    d12 = data;
+                    console.log('d12',d12);
+
+                    var d13;
+                    d3.csv('laucnty13.csv', function(error,data){
+                        handleError(error, 'failed to read geoJSON data');
+                        d13 = data;
+                        console.log('d13',d13); // outside of this, d13 not available
+                    })     
+
+                    var d14; 
+                    d3.csv('laucnty14.csv', function(error,data){
+                        handleError(error, 'failed to read geoJSON data');
+                        d14 = data;
+                    })
+
+                    var d15; 
+                    d3.csv('laucnty15.csv', function(error,data){
+                        handleError(error, 'failed to read geoJSON data');
+                        d15 = data;
+                    })
+
+                    var d16; 
+                    d3.csv('laucnty16.csv', function(error,data){
+                        handleError(error, 'failed to read geoJSON data');
+                        d16 = data;
+                    })
+                })
+           
+
+            }
+
+            buildMap('#map-holder');
+        </script>
+    </body>
+
+</html>

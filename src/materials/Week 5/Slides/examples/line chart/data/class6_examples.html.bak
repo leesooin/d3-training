@@ -1,0 +1,36 @@
+<html>
+
+    <head>
+        <title>Class6</title>
+    </head>
+
+    <body>
+        <div id="Class6"></div>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script>
+        	
+					d3.csv ('Teams.csv', function(error,data) {
+							if (error){
+								console.error('problem loading data');
+							}
+						  var teams = {};
+						  data.forEach(function(d){
+						 		if(Object.keys(teams).indexOf(d.name) >= 0){
+						 			teams[d.name] += +d.W;
+						 		} else {
+						 			teams[d.name] = +d.W;
+								}
+						  });
+						  console.log('t', teams);
+					});
+					
+					
+					// get total team wins in format:
+					// { 'teamName1': totWins,
+					//   'teamName2': totWins,
+					//   ...
+					// }
+
+        </script>
+    </body>
+</html>
